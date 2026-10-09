@@ -42,6 +42,7 @@
 #include "random.h"
 #include "roamer.h"
 #include "rotating_gate.h"
+#include "rt_battle.h"
 #include "safari_zone.h"
 #include "save.h"
 #include "save_location.h"
@@ -1442,6 +1443,9 @@ static void DoCB1_Overworld(u16 newKeys, u16 heldKeys)
     UpdatePlayerAvatarTransitionState();
     FieldClearPlayerInput(&inputStruct);
     FieldGetPlayerInput(&inputStruct, newKeys, heldKeys);
+        RT_Tick(newKeys);
+    if (RT_ShouldBlockInteraction())
+        inputStruct.pressedAButton = FALSE;
     if (!ArePlayerFieldControlsLocked())
     {
         if (ProcessPlayerFieldInput(&inputStruct) == 1)
