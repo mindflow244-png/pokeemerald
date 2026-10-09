@@ -1,0 +1,47 @@
+name: Compilar ROM
+
+# Se ejecuta solo: con cada subida a master y tambien a mano (boton "Run workflow").
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GAME_VERSION: EMERALD
+      GAME_REVISION: 0
+      GAME_LANGUAGE: ENGLISH
+      MODERN: 0
+      COMPARE: 0   # la ROM ya no es identica a la original, asi que no se compara
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout agbcc
+        uses: actions/checkout@v4
+        with:
+          path: agbcc
+          repository: pret/agbcc
+
+      - name: Install binutils
+        run: |
+          sudo apt update
+          sudo apt install binutils-arm-none-eabi libpng-dev
+
+      - name: Install agbcc
+        run: |
+          ./build.sh
+          ./install.sh ../
+        working-directory: agbcc
+
+      - name: Build ROM
+        run: make -j$(nproc) all
+
+      - name: Upload ROM
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokeemerald-rt-gba
+          path: pokeemerald.gba
+          if-no-files-found: error
